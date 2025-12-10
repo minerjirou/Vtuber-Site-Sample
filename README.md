@@ -6,7 +6,6 @@ Astroで構築した、Cloudflare Pages/R2対応のVTuber事務所サイトの�
 - Cloudflare Pagesで静的ホスティング
 - 画像はR2公開バケットから配信（`PUBLIC_R2_BASE_URL`）
 - メンバー紹介/ニュースをContent Collectionsで管理（Markdown）
-- ダークモード切替トグル（クラスベース、永続化）
 - メンバー/ニュースのタグ・カテゴリ + ページネーション
 - 衣装ギャラリー（モーダル・カルーセル、←/→/ESC、スワイプ）
 - SEO整備（OG/Twitter、canonical、JSON‑LD、sitemap、robots）
@@ -87,10 +86,6 @@ category: 歌い手
 - ニュースカテゴリ: `/news/category/<category-slug>/page/1`
 
 タグ/カテゴリのスラグは `src/utils/slug.ts` の `slugify()` で生成され、ページは静的にビルドされます。
-
-## ダークモード
-- ヘッダー右側のトグルでライト/ダークを切替（`localStorage`永続化）
-- Tailwindは `darkMode: 'class'` を使用
 
 ## 衣装ギャラリー
 - メンバー詳細ページでサムネクリック→モーダル表示
