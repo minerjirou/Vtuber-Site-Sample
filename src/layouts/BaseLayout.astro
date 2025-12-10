@@ -5,6 +5,8 @@ const title = Astro.props.title ?? import.meta.env.AGENCY_NAME ?? 'Vtuber Site S
 const description = Astro.props.description ?? undefined;
 const ogImage = Astro.props.ogImage ?? undefined;
 const ogType = Astro.props.ogType ?? undefined;
+const site = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const agency = import.meta.env.AGENCY_NAME ?? 'Vtuber Agency';
 ---
 <!DOCTYPE html>
 <html lang="ja">
@@ -23,6 +25,23 @@ const ogType = Astro.props.ogType ?? undefined;
           document.documentElement.classList.add('dark');
         }
       } catch {}
+    </script>
+    <script type="application/ld+json">
+      {JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: agency,
+        url: site || undefined,
+        logo: site ? `${site}/og.png` : '/og.png',
+      })}
+    </script>
+    <script type="application/ld+json">
+      {JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: agency,
+        url: site || undefined,
+      })}
     </script>
   </head>
   <body class="min-h-screen flex flex-col">

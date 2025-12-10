@@ -82,3 +82,19 @@ outfits:
   - ニュース: `NewsArticle` を `src/pages/news/[slug].astro` で出力
 - サイトマップ: `@astrojs/sitemap`（`astro.config.mjs` の `site` が必要）
 - robots.txt: `src/pages/robots.txt.ts`（`SITE` を使って動的にSitemap URLを出力）
+
+### 追加: 組織/サイトの構造化データ（共通）
+`src/layouts/BaseLayout.astro` に `Organization` / `WebSite` のJSON-LDを共通挿入します。
+
+### 追加: OG画像の自動生成（任意）
+ビルド前にOG画像を生成するスクリプトを同梱しています。
+
+```
+npm run gen:og
+```
+
+出力先:
+- メンバー: `public/og/member/<slug>.png`
+- ニュース: `public/og/news/<slug>.png`
+
+現状、ページでは既定OG（`/og.png`）やアバター画像を利用しています。生成画像を使いたい場合は、各ページの `ogImage` を `/og/...` に設定してください。

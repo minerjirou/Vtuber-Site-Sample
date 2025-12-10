@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "gen:og": "node scripts/gen-og-local.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "format": "prettier --write ."
@@ -19,9 +20,13 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@fontsource/noto-sans-jp": "^5.1.0",
+    "@resvg/resvg-js": "^2.6.2",
     "autoprefixer": "^10.4.20",
+    "gray-matter": "^4.0.3",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
+    "satori": "^0.10.13",
     "tailwindcss": "^3.4.14"
   }
 }
