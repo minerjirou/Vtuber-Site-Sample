@@ -1,0 +1,36 @@
+---
+const label = 'テーマ切替';
+---
+<button id="theme-toggle" aria-label={label} class="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm hover:border-brand">
+  <span class="light">🌙</span>
+  <span class="dark hidden">☀️</span>
+</button>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  const apply = (theme) => {
+    if (theme === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
+  };
+  const getNext = () => (document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+  const set = (theme) => {
+    localStorage.setItem('theme', theme);
+    apply(theme);
+    btn?.querySelector('.light')?.classList.toggle('hidden', theme === 'dark');
+    btn?.querySelector('.dark')?.classList.toggle('hidden', theme !== 'dark');
+  };
+  const init = () => {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved ?? (prefersDark ? 'dark' : 'light');
+    set(theme);
+  };
+  btn?.addEventListener('click', () => set(getNext()));
+  init();
+  // respond to OS changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) set(e.matches ? 'dark' : 'light');
+  });
+</script>
+

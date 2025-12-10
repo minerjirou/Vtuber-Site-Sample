@@ -1,0 +1,92 @@
+---
+import { r2 } from "@/utils/r2";
+
+export interface Outfit {
+  name: string;
+  image: string;
+}
+
+const { outfits } = Astro.props as { outfits: Outfit[] };
+const id = `gal-${Math.random().toString(36).slice(2)}`;
+---
+<div id={id}>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+    {outfits?.map((o, i) => (
+      <button type="button" class="group relative aspect-[3/4] overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800" data-index={i} aria-label={`衣装 ${o.name}`}>
+        <img src={r2(o.image)} alt={o.name} loading="lazy" decoding="async" class="h-full w-full object-cover group-hover:scale-[1.03] transition" />
+        <span class="absolute bottom-1 left-1 rounded bg-black/50 px-2 py-0.5 text-xs text-white">{o.name}</span>
+      </button>
+    ))}
+  </div>
+  <dialog class="backdrop:bg-black/60 rounded-xl p-0 overflow-hidden">
+    <div class="relative w-[92vw] max-w-4xl">
+      <div class="bg-black text-white flex items-center justify-between px-4 py-2 text-sm">
+        <span class="title">衣装</span>
+        <button class="btn-close rounded bg-white/10 px-2 py-1 hover:bg-white/20">閉じる</button>
+      </div>
+      <div class="relative bg-black">
+        <img class="block w-full h-auto select-none" alt="outfit" />
+        <button class="btn-prev absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 text-white w-9 h-9 grid place-items-center hover:bg-white/30">‹</button>
+        <button class="btn-next absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 text-white w-9 h-9 grid place-items-center hover:bg-white/30">›</button>
+      </div>
+      <div class="bg-black/90 text-white px-4 py-2 text-sm">
+        <span class="caption"></span>
+      </div>
+    </div>
+  </dialog>
+</div>
+
+<script>
+  const root = document.getElementById('{id}');
+  if (root) {
+    const dialog = root.querySelector('dialog');
+    const img = dialog?.querySelector('img');
+    const caption = dialog?.querySelector('.caption');
+    const title = dialog?.querySelector('.title');
+    const prevBtn = dialog?.querySelector('.btn-prev');
+    const nextBtn = dialog?.querySelector('.btn-next');
+    const closeBtn = dialog?.querySelector('.btn-close');
+    const thumbs = Array.from(root.querySelectorAll('button[data-index]'));
+    let index = 0;
+
+    const load = (i) => {
+      const btn = thumbs[i];
+      const image = btn?.querySelector('img');
+      const src = image?.getAttribute('src');
+      const alt = image?.getAttribute('alt') ?? '';
+      if (img && src) img.setAttribute('src', src);
+      if (caption) caption.textContent = alt;
+      if (title) title.textContent = `衣装 ${i + 1}/${thumbs.length}`;
+    };
+
+    const open = (i) => {
+      index = i;
+      load(index);
+      dialog?.showModal();
+    };
+    const close = () => dialog?.close();
+    const prev = () => { index = (index - 1 + thumbs.length) % thumbs.length; load(index); };
+    const next = () => { index = (index + 1) % thumbs.length; load(index); };
+
+    thumbs.forEach((btn, i) => btn.addEventListener('click', () => open(i)));
+    closeBtn?.addEventListener('click', close);
+    prevBtn?.addEventListener('click', prev);
+    nextBtn?.addEventListener('click', next);
+    dialog?.addEventListener('click', (e) => { if (e.target === dialog) close(); });
+
+    document.addEventListener('keydown', (e) => {
+      if (!dialog?.open) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    });
+
+    // basic swipe support
+    let startX = 0;
+    dialog?.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+    dialog?.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 30) (dx > 0 ? prev() : next());
+    });
+  }
+</script>

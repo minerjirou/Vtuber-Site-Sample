@@ -1,0 +1,16 @@
+---
+export interface Social {
+  name: string;
+  url: string;
+}
+const { socials } = Astro.props as { socials: Social[] };
+---
+<div class="flex flex-wrap gap-3">
+  {socials?.map((s) => (
+    <a href={s.url} target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm hover:border-brand hover:text-brand">
+      <span>{s.name}</span>
+    </a>
+  ))}
+  {!socials?.length && <span class="text-gray-400">SNSリンクなし</span>}
+  </div>
+

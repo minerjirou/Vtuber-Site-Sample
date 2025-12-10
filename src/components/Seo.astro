@@ -1,0 +1,30 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string; // absolute or root-relative
+  type?: 'website' | 'article' | 'profile';
+}
+const { title, description, image, type = 'website' } = Astro.props as Props;
+const site = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const url = site ? `${site}${Astro.url.pathname}` : Astro.url.pathname;
+const computedTitle = title ?? (import.meta.env.AGENCY_NAME ?? 'Vtuber Site Sample');
+const computedDesc = description ?? `${import.meta.env.AGENCY_NAME ?? 'Vtuber Agency'} の公式サイトサンプル`;
+const img = image ?? '/og.png';
+const imgAbs = img.startsWith('http') ? img : (site ? `${site}${img}` : img);
+---
+<title>{computedTitle}</title>
+<meta name="description" content={computedDesc} />
+<link rel="canonical" href={url} />
+
+<meta property="og:title" content={computedTitle} />
+<meta property="og:description" content={computedDesc} />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={url} />
+<meta property="og:image" content={imgAbs} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={computedTitle} />
+<meta name="twitter:description" content={computedDesc} />
+<meta name="twitter:image" content={imgAbs} />
+

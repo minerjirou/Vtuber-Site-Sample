@@ -1,0 +1,36 @@
+---
+import Base from '@/layouts/BaseLayout.astro';
+import MemberCard from '@/components/MemberCard.astro';
+import { getCollection } from 'astro:content';
+import { slugify } from '@/utils/slug';
+
+const members = (await getCollection('member')).sort((a, b) => a.data.order - b.data.order);
+const tags = Array.from(new Map(members.flatMap(m => (m.data.fanTags ?? []).map(t => [slugify(t), t])))).map(([slug, name]) => ({ slug, name }));
+const categories = Array.from(new Map(members.filter(m => m.data.category).map(m => [slugify(m.data.category as string), m.data.category as string]))).map(([slug, name]) => ({ slug, name }));
+---
+<Base title={`メンバー一覧 | ${import.meta.env.AGENCY_NAME ?? 'Vtuber Agency'}`} description="各メンバーのSNS、ファンタグ、入賞履歴、衣装ギャラリーを掲載しています。">
+  <section class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="text-3xl font-bold">メンバー紹介</h1>
+    <p class="mt-2 text-gray-600 dark:text-gray-300">各メンバーのSNS、ファンタグ、入賞履歴、衣装ギャラリーを掲載しています。</p>
+
+    {(tags.length > 0 || categories.length > 0) && (
+      <div class="mt-6 flex flex-wrap gap-3">
+        {categories.map(c => (
+          <a href={`/members/category/${c.slug}/page/1`} class="text-xs rounded-full border px-3 py-1 hover:border-brand">カテゴリ: {c.name}</a>
+        ))}
+        {tags.map(t => (
+          <a href={`/members/tag/${t.slug}/page/1`} class="text-xs rounded-full border px-3 py-1 hover:border-brand">#{t.name}</a>
+        ))}
+      </div>
+    )}
+
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {members.slice(0, 9).map((m) => (
+        <MemberCard name={m.data.name} avatar={m.data.avatar} slug={m.slug} tags={m.data.fanTags} />
+      ))}
+    </div>
+    <div class="mt-6 text-right">
+      <a href="/members/page/1" class="inline-block rounded border px-4 py-2 hover:border-brand">すべて見る →</a>
+    </div>
+  </section>
+</Base>

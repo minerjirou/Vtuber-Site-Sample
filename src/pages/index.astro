@@ -1,0 +1,40 @@
+---
+import Base from '@/layouts/BaseLayout.astro';
+import NewsList from '@/components/NewsList.astro';
+import MemberCard from '@/components/MemberCard.astro';
+import { getCollection } from 'astro:content';
+
+const news = (await getCollection('news')).sort((a, b) => +new Date(b.data.date) - +new Date(a.data.date)).slice(0, 5);
+const members = (await getCollection('member')).sort((a, b) => a.data.order - b.data.order).slice(0, 6);
+---
+<Base title={`ホーム | ${import.meta.env.AGENCY_NAME ?? 'Vtuber Agency'}`} description="メンバーの個性と魅力を発信する公式サイトサンプル。Cloudflare Pages + R2対応。">
+  <section class="relative overflow-hidden">
+    <div class="mx-auto max-w-6xl px-4 py-16 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">{import.meta.env.AGENCY_NAME ?? 'Vtuber Agency'}</h1>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">メンバーの個性と魅力を発信する公式サイトサンプル。Cloudflare Pages + R2対応。</p>
+        <div class="mt-6 flex gap-4">
+          <a href="/members" class="rounded-lg bg-brand px-5 py-2.5 text-white hover:bg-brand-dark">メンバーを見る</a>
+          <a href="/news" class="rounded-lg border px-5 py-2.5 hover:border-brand">ニュース</a>
+        </div>
+      </div>
+      <div class="aspect-[4/3] rounded-2xl bg-gradient-to-br from-brand/10 via-transparent to-brand/10 border border-gray-200 dark:border-gray-800"></div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 py-10">
+    <h2 class="text-2xl font-bold">最新ニュース</h2>
+    <div class="mt-6">
+      <NewsList items={news} />
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 py-10">
+    <h2 class="text-2xl font-bold">メンバー</h2>
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {members.map((m) => (
+        <MemberCard name={m.data.name} avatar={m.data.avatar} slug={m.slug} tags={m.data.fanTags} />
+      ))}
+    </div>
+  </section>
+</Base>

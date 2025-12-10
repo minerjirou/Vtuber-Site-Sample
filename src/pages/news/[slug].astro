@@ -1,0 +1,41 @@
+---
+import Base from '@/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const news = await getCollection('news');
+  return news.map((n) => ({ params: { slug: n.slug }, props: { n } }));
+}
+
+const { n } = Astro.props;
+const data = n.data;
+const { Content } = await n.render();
+---
+<Base title={`${data.title} | ニュース`} ogType="article" description={data.summary}>
+  <article class="mx-auto max-w-3xl px-4 py-10">
+    <div class="text-sm text-gray-500">{new Date(data.date).toLocaleDateString('ja-JP')}</div>
+    <h1 class="mt-1 text-3xl font-bold">{data.title}</h1>
+    {data.summary && <p class="mt-2 text-gray-600 dark:text-gray-300">{data.summary}</p>}
+    <div class="prose dark:prose-invert mt-8">
+      <Content />
+    </div>
+  </article>
+  <script type="application/ld+json">
+    {JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      headline: data.title,
+      datePublished: new Date(data.date).toISOString(),
+      dateModified: new Date(data.date).toISOString(),
+      description: data.summary ?? undefined,
+      author: { '@type': 'Organization', name: import.meta.env.AGENCY_NAME ?? 'Vtuber Agency' },
+      publisher: {
+        '@type': 'Organization',
+        name: import.meta.env.AGENCY_NAME ?? 'Vtuber Agency',
+        logo: { '@type': 'ImageObject', url: Astro.site ? new URL('/og.png', Astro.site).toString() : '/og.png' },
+      },
+      mainEntityOfPage: Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : Astro.url.pathname,
+      image: Astro.site ? new URL('/og.png', Astro.site).toString() : '/og.png',
+    })}
+  </script>
+</Base>

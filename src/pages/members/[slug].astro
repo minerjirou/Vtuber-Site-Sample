@@ -1,0 +1,97 @@
+---
+import Base from '@/layouts/BaseLayout.astro';
+import SocialLinks from '@/components/SocialLinks.astro';
+import OutfitGallery from '@/components/OutfitGallery.astro';
+import { r2 } from '@/utils/r2';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const members = await getCollection('member');
+  return members.map((m) => ({ params: { slug: m.slug }, props: { m } }));
+}
+
+const { m } = Astro.props;
+const data = m.data;
+const { Content } = await m.render();
+---
+<Base title={`${data.name} | メンバー`} ogType="profile" ogImage={r2(data.avatar)} description={data.bio}>
+  <article class="mx-auto max-w-6xl px-4 py-8">
+    <div class="grid md:grid-cols-[280px_1fr] gap-8 items-start">
+      <div class="sticky top-6">
+        <img src={r2(data.avatar)} alt={`${data.name} avatar`} class="w-full aspect-[3/4] object-cover rounded-xl border border-gray-200 dark:border-gray-800" />
+        <h1 class="mt-4 text-2xl font-bold">{data.name}</h1>
+        {data.fanTags.length > 0 && (
+          <div class="mt-2 flex flex-wrap gap-2">
+            {data.fanTags.map((t) => <span class="text-xs rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-gray-600 dark:text-gray-300">#{t}</span>)}
+          </div>
+        )}
+      </div>
+
+      <div class="space-y-10">
+        {data.bio && (
+          <section>
+            <h2 class="text-xl font-semibold">自己紹介</h2>
+            <p class="mt-2 container-prose">{data.bio}</p>
+          </section>
+        )}
+
+        <section>
+          <h2 class="text-xl font-semibold">SNS</h2>
+          <div class="mt-3">
+            <SocialLinks socials={data.socials} />
+          </div>
+        </section>
+
+        {data.category && (
+          <section>
+            <h2 class="text-xl font-semibold">カテゴリ</h2>
+            <div class="mt-2 text-sm">
+              <a href={`/members/category/${(await import('@/utils/slug')).slugify(data.category)}/page/1`} class="rounded-full border px-2 py-0.5 hover:border-brand">{data.category}</a>
+            </div>
+          </section>
+        )}
+
+        {data.awards.length > 0 && (
+          <section>
+            <h2 class="text-xl font-semibold">過去の入賞履歴</h2>
+            <ul class="mt-3 space-y-2">
+              {data.awards.map((a) => (
+                <li class="flex items-center gap-3">
+                  <span class="text-xs rounded bg-gray-100 dark:bg-gray-800 px-2 py-0.5">{a.year}</span>
+                  <span>{a.title}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {data.outfits.length > 0 && (
+          <section>
+            <h2 class="text-xl font-semibold">衣装ギャラリー</h2>
+            <div class="mt-3">
+              <OutfitGallery outfits={data.outfits} />
+            </div>
+          </section>
+        )}
+
+        <section>
+          <h2 class="text-xl font-semibold">詳細</h2>
+          <div class="prose dark:prose-invert mt-3">
+            <Content />
+          </div>
+        </section>
+      </div>
+    </div>
+  </article>
+  <script type="application/ld+json">
+    {JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: data.name,
+      url: Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : Astro.url.pathname,
+      image: r2(data.avatar),
+      sameAs: data.socials?.map((s) => s.url) ?? [],
+      description: data.bio ?? undefined,
+    })}
+  </script>
+</Base>

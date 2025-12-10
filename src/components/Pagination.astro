@@ -1,0 +1,23 @@
+---
+interface Props {
+  page: number;
+  pageCount: number;
+  basePath: string; // e.g. /members/page or /members/tag/foo/page
+}
+const { page, pageCount, basePath } = Astro.props as Props;
+const makeHref = (p: number) => `${basePath}/${p}`;
+---
+{pageCount > 1 && (
+  <nav class="mt-8 flex items-center justify-center gap-2" aria-label="ページネーション">
+    <a class={`px-3 py-1.5 rounded border ${page === 1 ? 'pointer-events-none opacity-50' : 'hover:border-brand'}`} href={page === 1 ? undefined : makeHref(page - 1)}>前へ</a>
+    {Array.from({ length: pageCount }).map((_, i) => {
+      const p = i + 1;
+      const active = p === page;
+      return (
+        <a href={makeHref(p)} class={`px-3 py-1.5 rounded border ${active ? 'bg-brand text-white border-brand' : 'hover:border-brand'}`}>{p}</a>
+      );
+    })}
+    <a class={`px-3 py-1.5 rounded border ${page === pageCount ? 'pointer-events-none opacity-50' : 'hover:border-brand'}`} href={page === pageCount ? undefined : makeHref(page + 1)}>次へ</a>
+  </nav>
+)}
+

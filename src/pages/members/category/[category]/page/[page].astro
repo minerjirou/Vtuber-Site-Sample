@@ -1,0 +1,46 @@
+---
+import Base from '@/layouts/BaseLayout.astro';
+import MemberCard from '@/components/MemberCard.astro';
+import Pagination from '@/components/Pagination.astro';
+import { getCollection } from 'astro:content';
+import { slugify } from '@/utils/slug';
+
+const PAGE_SIZE = 9;
+
+export async function getStaticPaths() {
+  const members = await getCollection('member');
+  const cats = new Map<string, string>(); // slug -> original
+  for (const m of members) {
+    const c = m.data.category;
+    if (c) {
+      const s = slugify(c);
+      if (!cats.has(s)) cats.set(s, c);
+    }
+  }
+  const paths: any[] = [];
+  for (const [slug, original] of cats) {
+    const filtered = members.filter((m) => m.data.category && slugify(m.data.category) === slug).sort((a, b) => a.data.order - b.data.order);
+    const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    for (let i = 1; i <= pageCount; i++) {
+      paths.push({ params: { category: slug, page: String(i) }, props: { category: original, slug, members: filtered, page: i, pageCount } });
+    }
+  }
+  return paths;
+}
+
+const { category, slug, members, page, pageCount } = Astro.props as { category: string; slug: string; members: any[]; page: number; pageCount: number };
+const start = (page - 1) * PAGE_SIZE;
+const items = members.slice(start, start + PAGE_SIZE);
+---
+<Base title={`メンバー: ${category} - ページ${page}`}>
+  <section class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="text-3xl font-bold">カテゴリ: {category}</h1>
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {items.map((m) => (
+        <MemberCard name={m.data.name} avatar={m.data.avatar} slug={m.slug} tags={m.data.fanTags} />
+      ))}
+    </div>
+    <Pagination page={page} pageCount={pageCount} basePath={`/members/category/${slug}/page`} />
+  </section>
+</Base>
+
